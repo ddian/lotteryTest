@@ -1,0 +1,235 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width,height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+
+	<style type="text/css">
+	*{margin: 0;padding: 0;list-style: none;text-decoration: none}
+
+
+	#box{
+		margin:100px auto;width: 80%;height: 50%;border-left: 1px solid #333;border-right: 1px solid #333;display:-webkit-box;-webkit-box-pack:center;display: -webkit-flex;-webkit-justify-content: space-around;-webkit-flex-flow: row wrap;overflow: hidden;}
+	ul{
+		position: relative;-webkit-flex:1;flex:1;
+	}
+	ol{width: 8px;height: 100%;background: pink}
+	li{
+		position: relative;
+	}
+	img{
+		position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;
+	}
+	</style>
+
+</head>
+<body>
+	<button id="btn">123123</button>
+<div id='box'>
+		
+		<ul id="ul1" ></ul>
+		
+		<ol></ol>
+
+		<ul id="ul2" ></ul>
+		
+		<ol></ol>
+
+		<ul id="ul3" ></ul>
+</div>
+
+</body>
+</html>
+
+
+<script type="text/javascript">
+var oBox = document.getElementById('box');
+var aUl = [document.getElementById('ul1'),document.getElementById('ul2'),document.getElementById('ul3')];
+var arr=['1.png','2.png','3.png','4.png','5.png'];
+var brr=['6.png']
+var imgLength=arr.length;
+var aImg = [];
+var oOlWidth = 8;
+var oAnimation=null;
+oBox.style.height=parseFloat(getComputedStyle(oBox,false).width)*0.6+'px';
+
+
+//加载图片
+for(var i=0;i<arr.length;i++){
+	var oImage = new Image();
+	oImage.src = arr[i];
+	aImg[i]=oImage;
+	oImage.onload=function(){
+		imgLength--;
+		//图片尝试加载完成
+		if(!imgLength){	
+			setup();
+		};
+	};
+	oImage.onerror=function(){
+		imgLength--;
+		console.log(oImage.src+'图片加载不出来');
+		//图片尝试加载完成
+		if(!imgLength){	
+			setup();
+		};
+	};
+
+};
+function setup(){
+	var oImgHeight = 0,oUlHeight=0,oUlTop=0,oPHeight=0;
+	aUl.forEach(function(oUl){
+		for (var i = 0; i < aImg.length; i++) {
+			var newLi = document.createElement('li');
+			var newImg = document.createElement('img');
+			var newP = document.createElement('p');
+			newImg.src=aImg[i].src;
+			newLi.appendChild(newImg);
+			//计算li为满格高1/3
+			newLi.style.height=oBox.offsetHeight/3+'px';
+			//计算li为满格宽1/3-ol宽度
+			// newLi.style.height=(oBox.offsetWidth/3-2*oOlWidth)+'px';
+			//计算img为满格宽1/3-ol宽度
+			// newImg.style.width=(oBox.offsetWidth/3-2*oOlWidth)+'px';
+			//计算img为满格高1/3跟li一致
+			newImg.style.width = oBox.offsetHeight/3+'px';
+
+			//计算p为img满格宽1/3-ol 1/3宽度
+			oPHeight= parseInt( (oBox.offsetWidth/3-2*oOlWidth)/3 ); 
+			//计算p为img的20%
+			// oPHeight= parseInt( (oBox.offsetHeight / 3 ) / 5 );
+
+			newP.style.height=oPHeight+'px';
+
+			oUl.appendChild(newLi);
+			oUl.appendChild(newP);
+
+		};
+		
+		oUl.style.top =  -oPHeight + 'px';
+		oUlTop = -oPHeight;
+		oUl.style.height=parseInt(oUl.children[0].style.height)*oUl.children.length+'px';
+	});
+	//得到奖品	
+	function getPrice(oSrc,callback){
+		var newLi = document.createElement('li');
+		var newImg = document.createElement('img');
+		var newP = document.createElement('p');
+		newImg.src=oSrc;
+		newLi.appendChild(newImg);
+		//计算li为满格高1/3
+		newLi.style.height=oBox.offsetHeight/3+'px';
+		//计算img为满格宽1/3-ol宽度
+		// newImg.style.width=(oBox.offsetWidth/3-2*oOlWidth)+'px';
+		newImg.style.width = oBox.offsetHeight/3+'px';
+		oImgHeight = oBox.offsetHeight/3;
+
+		//计算p为img的20%
+		oPHeight= parseInt( (oBox.offsetWidth/3-2*oOlWidth)/3 ); 
+		newP.style.height=oPHeight+'px';
+		
+		aUl.forEach(function(oUl){
+			oUl.appendChild(newLi);
+			oUl.appendChild(newP);
+
+			oUl.innerHTML+=oUl.innerHTML;
+			//@
+			
+			oUl.style.height=(Math.ceil(oUl.children[0].offsetHeight)+Math.ceil(oUl.children[1].offsetHeight) )*oUl.children.length/2+'px';
+
+			// console.log(oUl.children.length)
+			//单列长度
+			newImg.onload=function(){
+
+				oUlHeight=(Math.ceil(oUl.children[0].offsetHeight)+Math.ceil(oUl.children[1].offsetHeight) )*oUl.children.length/2;
+				callback();
+			};
+
+		});
+		
+
+	};
+
+	//点击
+	var oBtn = document.getElementById('btn');
+	  var countStop=0;
+	oBtn.onclick=function(){
+		//设定奖品
+		getPrice(brr[0],function(){
+			startMove(0,30);
+            startMove(1,30);
+            startMove(2,30);
+		});
+	};
+
+	function startMove(index,speed){
+		 var oUl = aUl[index]
+        oUl.dataset.stop=false;
+        var curTime=0;
+        var n =  -oUlHeight/2;
+        var startSpeed=speed;
+        var stopPos = -oUlHeight/2 +2*(oPHeight+oImgHeight);
+		oUl.style.webkitTransform='translate(0px,'+(n)+'px)'+'translateZ(0)';
+        //设定停止
+        setStop(0,3)
+        function setStop(index,time){
+            setTimeout(function(){
+                aUl[index].dataset.stop=true
+            },100*time)
+        }
+		function animation(){
+	        if(oUl.dataset.stop=='true'){
+                curTime++
+                if(curTime<=100){
+                    speed = easeOut(startSpeed,5-startSpeed,curTime,100)  
+                };
+	        };
+			n+=speed;
+			if(n>=0){
+				n=-oUlHeight/2;
+			};
+			if(speed<=5 && Math.abs(n-stopPos)<=4){	
+				countStop++;
+	    		oUl.style.webkitTransform='translate(0px,'+(stopPos)+'px)'+'translateZ(0)';
+	    		  //分步停止
+	            if(index==0){
+	                setStop(1,2)
+	            }else if(index==1){
+	                setStop(2,2)
+	            };
+	            //#9所有转动结束,提示奖品
+	            if(countStop==3){
+	            	alert('抽奖结束')
+	            };
+			}else{
+				oUl.style.webkitTransform='translate(0px,'+(n)+'px)'+'translateZ(0)';
+				requestAnimationFrame(animation);
+			};			
+		};
+		requestAnimationFrame(animation);
+		 //减速函数
+        function easeOut (start,alter,curTime,dur) {
+            return start+Math.pow(curTime/dur,2)*alter;
+        };
+	};
+};
+function easeOut (start,alter,curTime,dur) {
+	return start+Math.pow(curTime/dur,2)*alter;
+
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
